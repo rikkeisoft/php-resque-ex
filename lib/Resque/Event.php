@@ -18,26 +18,27 @@ class Resque_Event
 	 *
 	 * @param string $event Name of event to be raised.
 	 * @param mixed $data Optional, any data that should be passed to each callback.
-	 * @return true
+	 * @return int
 	 */
 	public static function trigger($event, $data = null)
 	{
-		if (!is_array($data)) {
-			$data = array($data);
-		}
+            $fired = 0;
 
-		if (empty(self::$events[$event])) {
-			return true;
-		}
-		
-		foreach (self::$events[$event] as $callback) {
-			if (!is_callable($callback)) {
-				continue;
-			}
-			call_user_func_array($callback, $data);
-		}
-		
-		return true;
+            if (!is_array($data)) {
+                $data = array($data);
+            }
+
+            if (!empty(self::$events[$event])) {
+                foreach (self::$events[$event] as $callback) {
+                    if (!is_callable($callback)) {
+                        continue;
+                    }
+                    $fired++;
+                    call_user_func_array($callback, $data);
+                }
+            }
+
+            return $fired;
 	}
 	
 	/**

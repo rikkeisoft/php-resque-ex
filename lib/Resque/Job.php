@@ -161,7 +161,7 @@ class Resque_Job
 		} else {
 			if(!class_exists($this->payload['class'])) {
 				throw new Resque_Exception(
-					'Could not find job class ' . $this->payload['class'] . '.'
+					'Could not find job class ' . $this->payload['class'] . ' (Resque_Job_Creator not loaded).'
 				);
 			}
 
@@ -171,11 +171,11 @@ class Resque_Job
 				);
 			}
 			$this->instance = new $this->payload['class']();
+                        $this->instance->job = $this;
+ 			$this->instance->args = $this->getArguments();
+  			$this->instance->queue = $this->queue;
 		}
 
-		$this->instance->job = $this;
-		$this->instance->args = $this->getArguments();
-		$this->instance->queue = $this->queue;
 		return $this->instance;
 	}
 
@@ -188,7 +188,7 @@ class Resque_Job
 	 */
 	public function perform()
 	{
-		$instance = $this->getInstance();
+            $instance = $this->getInstance();
 		try {
 			Resque_Event::trigger('beforePerform', $this);
 
